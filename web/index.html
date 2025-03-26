@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <!--
+    If you are serving your web app in a path other than the root, change the
+    href value below to reflect the base path you are serving from.
+
+    The path provided below has to start and end with a slash "/" in order for
+    it to work correctly.
+
+    For more details:
+    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
+
+    This is a placeholder for base href that will be replaced by the value of
+    the `--base-href` argument provided to `flutter build`.
+  -->
+  <base href="$FLUTTER_BASE_HREF">
+
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="description" content="Project template for Hancod Tech team">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- iOS meta tags & icons -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="Aurum Neuro 2025">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="favicon.png" />
+
+  <title>Aurum Neuro 2025</title>
+  <link rel="manifest" href="manifest.json">
+
+  <!-- Add this in the head section -->
+  <meta name="camera" content="camera" />
+  <meta http-equiv="Content-Security-Policy" content="camera 'self'" />
+  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.3.1/dist/jsQR.min.js"></script>
+
+</head>
+
+<body>
+  <!-- This script installs service_worker.js to provide PWA functionality to
+       application. For more information, see:
+       https://developers.google.com/web/fundamentals/primers/service-workers -->
+  <script>
+    var serviceWorkerVersion = null;
+    var scriptLoaded = false;
+    function loadMainDartJs() {
+      if (scriptLoaded) {
+        return;
+      }
+      scriptLoaded = true;
+      var scriptTag = document.createElement('script');
+      scriptTag.src = 'main.dart.js';
+      scriptTag.type = 'application/javascript';
+      document.body.append(scriptTag);
+    }
+
+    if ('serviceWorker' in navigator) {
+      // Service workers are supported. Use them.
+      window.addEventListener('load', function () {
+        // Wait for registration to finish before dropping the <script> tag.
+        // Otherwise, the browser will load the script multiple times,
+        // potentially different versions.
+        var serviceWorkerUrl = 'flutter_service_worker.js?v=' + serviceWorkerVersion;
+        navigator.serviceWorker.register(serviceWorkerUrl)
+          .then((reg) => {
+            function waitForActivation(serviceWorker) {
+              serviceWorker.addEventListener('statechange', () => {
+                if (serviceWorker.state == 'activated') {
+                  console.log('Installed new service worker.');
+                  loadMainDartJs();
+                }
+              });
+            }
+            if (!reg.active && (reg.installing || reg.waiting)) {
+              // No active web worker and we have installed or are installing
+              // one for the first time. Simply wait for it to activate.
+              waitForActivation(reg.installing || reg.waiting);
+            } else if (!reg.active.scriptURL.endsWith(serviceWorkerVersion)) {
+              // When the app updates the serviceWorkerVersion changes, so we
+              // need to ask the service worker to update.
+              console.log('New service worker available.');
+              reg.update();
+              waitForActivation(reg.installing);
+            } else {
+              // Existing service worker is still good.
+              console.log('Loading app from service worker.');
+              loadMainDartJs();
+            }
+          });
+
+        // If service worker doesn't succeed in a reasonable amount of time,
+        // fallback to plaint <script> tag.
+        setTimeout(() => {
+          if (!scriptLoaded) {
+            console.warn(
+              'Failed to load app from service worker. Falling back to plain <script> tag.',
+            );
+            loadMainDartJs();
+          }
+        }, 4000);
+      });
+    } else {
+      // Service workers not supported. Just drop the <script> tag.
+      loadMainDartJs();
+    }
+  </script>
+</body>
+<!-- This is an alternate configuration with loading screen -->
+
+<!--   
+  <style type="text/css">
+    html {
+      height: 100%
+    }
+
+    body {
+      margin: 0;
+      min-height: 100%;
+      background-color: #0A003D;
+      background-image: url("splash/img/light-background.png");
+      background-size: contain;
+      background-position: center center;
+      background-repeat: no-repeat;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .small-screen-warning {
+      color: white;
+      text-align: center;
+      position: absolute;
+      bottom: 200px;
+      display: none;
+    }
+
+    /* @media (max-width: 600px) {
+      flutter-view {
+        display: none;
+      }
+
+      .small-screen-warning {
+        display: block;
+      }
+    } */
+  </style>
+</head>
+
+<body>
+  <div id="progress-bar" style="border: 1px solid white; width: 250px; height: 20px;transform: translateY(80px);">
+    <div id="progress-indicator" style="background-color: white; height: 100%; width: 0%;"></div>
+  </div>
+  <script>
+    // The value below is injected by flutter build, do not touch.
+    var serviceWorkerVersion = null;
+  </script>
+  <script>
+    (function () {
+      const progressBar = document.querySelector('#progress-bar');
+      const progressIndicator = document.querySelector('#progress-indicator');
+
+      const additionalScripts = [
+        // Add additional scripts here.
+      ];
+
+      function injectScript(url) {
+        return new Promise(function (resolve) {
+          let scriptTag = document.createElement('script');
+          scriptTag.src = url;
+          scriptTag.type = 'application/javascript';
+          scriptTag.onload = function () {
+            resolve();
+          };
+
+          document.body.append(scriptTag);
+        });
+      }
+
+      function beginPreloading(manifestAssets) {
+        var assets = [
+          'flutter.js',
+          'main.dart.js',
+          'canvaskit/canvaskit.wasm',
+          'canvaskit/canvaskit.js',
+          ...additionalScripts,
+          ...manifestAssets,
+        ];
+        let totalAssets = assets.length + 1;
+        let loaded = 0;
+
+        const batchSize = 40;
+
+        async function reportProgress() {
+          loaded++;
+          const value = Math.floor((loaded / totalAssets) * 100) + '%';
+          progressIndicator.style.width = value;
+
+          if (assets.length == 0) {
+            dispatchAppLoad();
+          } else {
+            load(assets.shift());
+          }
+        }
+
+        function load(url) {
+          const req = new XMLHttpRequest();
+          req.onload = reportProgress;
+          req.open('get', url);
+          req.send();
+        }
+
+        function startBatch() {
+          const end = Math.min(batchSize, assets.length);
+          for (let i = 0; i < end; i++) {
+            load(assets.shift());
+          }
+        }
+
+
+        var scriptLoaded = false;
+        async function dispatchAppLoad() {
+          if (scriptLoaded) {
+            return;
+          }
+          scriptLoaded = true;
+
+          for (let i = 0; i < additionalScripts.length; i++) {
+            await injectScript(additionalScripts[i]);
+          }
+
+          await injectScript('flutter.js');
+
+          // Download main.dart.js
+          _flutter.loader.loadEntrypoint({
+            serviceWorker: {
+              serviceWorkerVersion: serviceWorkerVersion,
+            },
+            onEntrypointLoaded: function (engineInitializer) {
+              engineInitializer.initializeEngine().then(async function (appRunner) {
+                window.addEventListener("flutter-first-frame", function () {
+                  progressBar.remove();
+                  document.body.classList.remove('loading-mode');
+                });
+
+                appRunner.runApp();
+              });
+            }
+          });
+        }
+
+        startBatch();
+      }
+
+      window.addEventListener('load', async function (ev) {
+        const response = await fetch('assets/AssetManifest.json');
+        const manifest = await response.json();
+        const assets = Object.values(manifest)
+          .map((list) => list.map((url) => 'assets/' + url))
+          .reduce((arr, curr) => [...arr, ...curr], []);
+
+        beginPreloading(assets);
+      });
+    })();
+  </script>
+
+  <script>
+    window.fbAsyncInit = function () {
+      FB.init({
+        appId: '760508759293726',
+        cookie: true,
+        xfbml: true,
+        version: '{api-version}'
+      });
+
+      FB.AppEvents.logPageView();
+
+    };
+
+    (function (d, s, id) {
+      var js, fjs = d.getElementsByTagName(s)[0];
+      if (d.getElementById(id)) { return; }
+      js = d.createElement(s); js.id = id;
+      js.src = "https://connect.facebook.net/en_US/sdk.js";
+      fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));
+  </script>
+  <span class="small-screen-warning">
+    Our developers are diligently working to enhance your mobile experience.
+  </span>
+</body> -->
+
+</html>

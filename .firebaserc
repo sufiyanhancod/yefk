@@ -1,0 +1,24 @@
+{
+    "projects": {
+        "dev": "dev-proj-id",
+        "prod": "aurumneuro-c475c"
+    },
+    "targets": {
+        "aurumneuro-c475c": {
+            "hosting": {
+                "prod": [
+                    "aurumneuro-c475c"
+                ]
+            }
+        },
+        "dev-proj-id": {
+            "hosting": {
+                "dev": [
+                    "aurumneuro-c475c"
+                ]
+            }
+        }
+    },
+    "etags": {},
+    "dataconnectEmulatorConfig": {}
+}

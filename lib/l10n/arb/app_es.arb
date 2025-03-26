@@ -1,0 +1,15 @@
+{
+  "@@locale": "es",
+  "age": "Age",
+  "cancel": "Cancel",
+  "counterAppBarTitle": "Contador",
+  "@counterAppBarTitle": {
+    "description": "Texto mostrado en la AppBar de la página del contador"
+  },
+  "date": "Date",
+  "helloHancod": "Hello Hancod!",
+  "phoneNo": "Phone No.",
+  "primary": "Primary",
+  "secondary": "Secondary",
+  "textForm": "Text form"
+}
