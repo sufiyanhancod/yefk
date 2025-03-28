@@ -3,12 +3,9 @@ import 'package:app/features/home/presentation/home_presentation.dart';
 import 'package:app/gen/assets.gen.dart';
 import 'package:app/l10n/l10n.dart';
 import 'package:app/shared/shared.dart';
-import 'package:app/shared/widgets/bottom_nav.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:hancod_theme/hancod_theme.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// Exposes a [GoRouter] that uses a [Listenable] to refresh its internal state.
@@ -65,15 +62,22 @@ class AppRouter {
   static const String login = 'login';
   static const String adminLogin = 'adminLogin';
   static const String audienceHome = 'audienceHome';
+  static const String askQuestion = 'askQuestion';
+  static const String adminSignup = 'adminSignup';
   late final GoRouter router = GoRouter(
     navigatorKey: _rootNavigatorKey,
     debugLogDiagnostics: true,
-    initialLocation: '/$splash',
+    initialLocation: '/$adminSignup',
     routes: [
+      // GoRoute(
+      //   path: '/$splash',
+      //   name: splash,
+      //   builder: (context, state) => const SplashScreen(),
+      // ),
       GoRoute(
-        path: '/$splash',
-        name: splash,
-        builder: (context, state) => const SplashScreen(),
+        path: '/$adminSignup',
+        name: adminSignup,
+        builder: (context, state) => const AdminsignupScreen(),
       ),
       GoRoute(
         path: '/$login',
@@ -85,6 +89,21 @@ class AppRouter {
         name: audienceHome,
         builder: (context, state) => const AudiencehomeScreen(),
       ),
+      GoRoute(
+        path: '/$askQuestion',
+        name: askQuestion,
+        builder: (context, state) => const AskqestionScreen(),
+      ),
+      GoRoute(
+        path: '/$adminLogin',
+        name: adminLogin,
+        builder: (context, state) => const AdminloginScreenMobile(),
+      ),
+      // GoRoute(
+      //   path: '/$adminSignup',
+      //   name: adminSignup,
+      //   builder: (context, state) => const AdminsignupScreenMobile(),
+      // ),
 
       // GoRoute(
       //   name: notification,
@@ -224,26 +243,42 @@ class AppRouter {
   }
 }
 
-class SplashScreen extends StatefulWidget {
+class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
 
   @override
-  State<SplashScreen> createState() => _SplashScreenState();
+  ConsumerState<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> {
+class _SplashScreenState extends ConsumerState<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(
-      const Duration(seconds: 3),
-      () {
-        // Change '/dashboard' to '/home' since that's your defined route
+    _checkUserDataAndNavigate();
+  }
+
+  Future<void> _checkUserDataAndNavigate() async {
+    try {
+      final prefs = await ref.read(sharedPrefsProvider.future);
+      final email = prefs.getString('email');
+      final phoneNumber = prefs.getString('phoneNumber');
+
+      await Future.delayed(const Duration(seconds: 3));
+
+      if (email != null && phoneNumber != null) {
+        // User data exists, navigate to audience home
+        AppRouter.go('/${AppRouter.audienceHome}');
+      } else {
+        // No user data, check auth status and navigate accordingly
         AppRouter.go(
           AppRouter.read(supabaseProvider).auth.currentSession?.isExpired ?? true ? '/login' : '/home',
         );
-      },
-    );
+      }
+    } catch (e) {
+      debugPrint('Error checking user data: $e');
+      // Fallback to login if there's an error
+      AppRouter.go('/login');
+    }
   }
 
   @override

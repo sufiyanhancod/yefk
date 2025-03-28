@@ -1,7 +1,9 @@
 import 'package:app/features/home/home.dart';
 import 'package:app/gen/assets.gen.dart';
+import 'package:app/shared/shared.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hancod_theme/colors.dart';
 
 class AudiencehomeScreenMobile extends ConsumerStatefulWidget {
@@ -191,6 +193,11 @@ class _AudiencehomeScreenMobileState extends ConsumerState<AudiencehomeScreenMob
       itemBuilder: (context, index) {
         final event = dayEvents[index];
         return SpeakerTile(
+          onTap: () {
+            context.goNamed(
+              AppRouter.askQuestion,
+            );
+          },
           name: event.speakerName,
           time: '${_formatTime(event.startTime)} - ${_formatTime(event.endTime)}',
           speakerId: event.speakerId,
@@ -227,6 +234,7 @@ class SpeakerTile extends StatelessWidget {
   final int eventId;
   final int questionCount;
   final int pendingQuestions;
+  final VoidCallback onTap;
 
   const SpeakerTile({
     super.key,
@@ -236,96 +244,100 @@ class SpeakerTile extends StatelessWidget {
     required this.eventId,
     required this.questionCount,
     this.pendingQuestions = 0,
+    required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: Colors.grey.shade100,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        children: [
-          // Speaker icon (circle with face)
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
-              border: Border.all(color: Colors.blue.shade300, width: 1),
-            ),
-            child: const Center(
-              child: Icon(
-                Icons.person_outline,
-                color: Colors.blue,
-                size: 20,
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: Colors.grey.shade100,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            // Speaker icon (circle with face)
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.blue.shade300, width: 1),
               ),
-            ),
-          ),
-
-          const SizedBox(width: 16),
-
-          // Speaker info
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  name,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  time,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey.shade700,
-                  ),
-                ),
-                if (questionCount > 0)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: Text(
-                      'Questions: $questionCount${pendingQuestions > 0 ? ' ($pendingQuestions pending)' : ''}',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: pendingQuestions > 0 ? Colors.orange.shade700 : Colors.grey.shade700,
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-
-          // Question mark icon (now a button to add questions)
-          Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              color: const Color(0xFF2B6CA3),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: InkWell(
-              onTap: () {
-                // Handle question action here
-                // You can navigate to a question form or show a dialog
-              },
               child: const Center(
                 child: Icon(
-                  Icons.question_mark,
-                  color: Colors.white,
+                  Icons.person_outline,
+                  color: Colors.blue,
                   size: 20,
                 ),
               ),
             ),
-          ),
-        ],
+
+            const SizedBox(width: 16),
+
+            // Speaker info
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    name,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    time,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey.shade700,
+                    ),
+                  ),
+                  if (questionCount > 0)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 4),
+                      child: Text(
+                        'Questions: $questionCount${pendingQuestions > 0 ? ' ($pendingQuestions pending)' : ''}',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: pendingQuestions > 0 ? Colors.orange.shade700 : Colors.grey.shade700,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+
+            // Question mark icon (now a button to add questions)
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: const Color(0xFF2B6CA3),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: InkWell(
+                onTap: () {
+                  // Handle question action here
+                  // You can navigate to a question form or show a dialog
+                },
+                child: const Center(
+                  child: Icon(
+                    Icons.question_mark,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

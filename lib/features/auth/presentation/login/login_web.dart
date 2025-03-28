@@ -90,7 +90,9 @@ class _LoginScreenWebState extends ConsumerState<LoginScreenWeb> {
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      // Name Field
+                                      const SizedBox(height: 20),
+
+                                      // Phone Number Field
                                       const Text(
                                         'Name',
                                         style: TextStyle(
@@ -111,12 +113,9 @@ class _LoginScreenWebState extends ConsumerState<LoginScreenWeb> {
                                           ),
                                         ),
                                       ),
-
-                                      const SizedBox(height: 20),
-
-                                      // Phone Number Field
+                                      // Name Field
                                       const Text(
-                                        'Phone Number',
+                                        'Email',
                                         style: TextStyle(
                                           fontSize: 14,
                                           color: Colors.grey,
@@ -124,13 +123,12 @@ class _LoginScreenWebState extends ConsumerState<LoginScreenWeb> {
                                       ),
                                       const SizedBox(height: 8),
                                       AppTextForm<String>(
-                                        name: 'phone',
+                                        name: 'email',
                                         validator: FormBuilderValidators.compose([
                                           FormBuilderValidators.required(),
-                                          FormBuilderValidators.numeric(),
                                         ]),
                                         decoration: InputDecoration(
-                                          hintText: 'Enter your phone number',
+                                          hintText: 'Enter your email',
                                           border: OutlineInputBorder(
                                             borderRadius: BorderRadius.circular(8),
                                           ),
@@ -143,7 +141,7 @@ class _LoginScreenWebState extends ConsumerState<LoginScreenWeb> {
                                       Center(
                                         child: TextButton(
                                           onPressed: () {
-                                            // Handle admin sign up
+                                            context.pushNamed(AppRouter.adminLogin);
                                           },
                                           child: const Text(
                                             'Sign up as Admin',
@@ -163,14 +161,17 @@ class _LoginScreenWebState extends ConsumerState<LoginScreenWeb> {
                                         child: AppButton(
                                           isLoading: ref.watch(authenticationNotifierProvider).status == AuthenticationStatus.loading,
                                           onPress: () {
-                                            context.pushNamed(AppRouter.audienceHome);
-                                            // if (_formKey.currentState?.saveAndValidate() ?? false) {
-                                            //   ref.read(authenticationNotifierProvider.notifier).signInWithPhone(
-                                            //         name: _formKey.currentState!.value['name'] as String,
-                                            //         phoneNumber: _formKey.currentState!.value['phone'] as String,
-                                            //         email: _formKey.currentState!.value['email'] as String,
-                                            //       );
-                                            // }
+                                            if (_formKey.currentState?.saveAndValidate() ?? false) {
+                                              ref
+                                                  .read(normaluserloginNotifierProvider.notifier)
+                                                  .saveUserDataToLocalStorage(
+                                                    phoneNumber: _formKey.currentState!.value['name'] as String,
+                                                    email: _formKey.currentState!.value['email'] as String,
+                                                  )
+                                                  .then((value) {
+                                                context.pushNamed(AppRouter.audienceHome);
+                                              });
+                                            }
                                           },
                                           label: const Text(
                                             'Sign Up',

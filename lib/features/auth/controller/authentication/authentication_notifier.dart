@@ -1,5 +1,4 @@
 import 'package:app/features/auth/auth.dart';
-import 'package:app/features/home/home.dart';
 import 'package:app/shared/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -18,16 +17,19 @@ class AuthenticationNotifier extends _$AuthenticationNotifier {
     return AuthenticationState.initial();
   }
 
-  Future<void> signInWithPhone({required String phoneNumber, required String name, required String email}) async {
+  Future<bool> signInWithEmail({required String email, required String password}) async {
     state = state.copyWith(status: AuthenticationStatus.loading);
     try {
-      await _authRepository.signInWithPhone(phoneNumber, name, email);
+      await _authRepository.signInWithEmail(email, password);
       state = state.copyWith(status: AuthenticationStatus.success);
       debugPrint('success');
       AppRouter.goNamed(AppRouter.home);
+      return true;
     } catch (e) {
+      Alert.showSnackBar(e.toString());
       debugPrint(e.toString());
       state = state.copyWith(status: AuthenticationStatus.error);
+      return false;
     }
   }
 
@@ -36,5 +38,11 @@ class AuthenticationNotifier extends _$AuthenticationNotifier {
     await _authRepository.signOut();
     state = state.copyWith(status: AuthenticationStatus.initial);
     AppRouter.goNamed(AppRouter.login);
+  }
+
+  Future<void> signUpUser({required String email, required String password, required String name, required String userType}) async {
+    state = state.copyWith(status: AuthenticationStatus.loading);
+    await _authRepository.signUpUser(email: email, password: password, name: name, userType: userType);
+    state = state.copyWith(status: AuthenticationStatus.success);
   }
 }
