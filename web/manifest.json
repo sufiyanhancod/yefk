@@ -1,11 +1,11 @@
 {
-    "name": "Aurum Neuro 2025",
-    "short_name": "Aurum Neuro 2025",
+    "name": "YAfK 2025",
+    "short_name": "YAfK 2025",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "Aurum Neuro 2025",
+    "description": "YAfK 2025",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

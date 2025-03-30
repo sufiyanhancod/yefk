@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hancod_theme/colors.dart';
+import 'package:universal_html/html.dart' as html;
 
 class AudiencehomeScreenMobile extends ConsumerStatefulWidget {
   const AudiencehomeScreenMobile({super.key});
@@ -14,14 +15,26 @@ class AudiencehomeScreenMobile extends ConsumerStatefulWidget {
 }
 
 class _AudiencehomeScreenMobileState extends ConsumerState<AudiencehomeScreenMobile> {
-  // Removed SingleTickerProviderStateMixin and TabController
-  // We'll use DefaultTabController to simplify implementation
+  void _downloadPdfWeb(String url) {
+    // Create a blob URL for direct download
+    html.AnchorElement anchor = html.AnchorElement(href: url)
+      ..setAttribute('download', 'yefk_brochure.pdf')
+      ..style.display = 'none';
+
+    html.document.body?.children.add(anchor);
+    anchor.click();
+
+    // Cleanup
+    html.document.body?.children.remove(anchor);
+  }
+
   @override
   void initState() {
-    Future.microtask(() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(audiencehomeNotifierProvider.notifier).getEventSchedule();
     });
-    super.initState();
   }
 
   @override
@@ -68,7 +81,7 @@ class _AudiencehomeScreenMobileState extends ConsumerState<AudiencehomeScreenMob
                       // Download button
                       Center(
                         child: ElevatedButton.icon(
-                          onPressed: () {},
+                          onPressed: () => _downloadPdfWeb('https://ngmqewfobapfktlshmkv.supabase.co/storage/v1/object/public/assets//YAFK%20Sponsor%20Brochure.pdf'),
                           icon: const Icon(Icons.download, color: Colors.white),
                           label: const Text(
                             'DOWNLOAD BROCHURE',
@@ -148,10 +161,10 @@ class _AudiencehomeScreenMobileState extends ConsumerState<AudiencehomeScreenMob
                           child: TabBarView(
                             children: [
                               // Day 1 Content
-                              _buildEventsList(eventScheduleState.eventSchedule ?? [], day: 1),
+                              _buildEventsList(eventScheduleState.eventSchedule ?? [], day: 1, isUser: ref.watch(supabaseProvider).auth.currentUser != null),
 
                               // Day 2 Content
-                              _buildEventsList(eventScheduleState.eventSchedule ?? [], day: 2),
+                              _buildEventsList(eventScheduleState.eventSchedule ?? [], day: 2, isUser: ref.watch(supabaseProvider).auth.currentUser != null),
                             ],
                           ),
                         ),
@@ -169,9 +182,9 @@ class _AudiencehomeScreenMobileState extends ConsumerState<AudiencehomeScreenMob
   }
 
   // New method to build events list for a specific day
-  Widget _buildEventsList(List<EventSchedule> events, {required int day}) {
+  Widget _buildEventsList(List<EventSchedule> events, {required int day, required bool isUser}) {
     // Filter events for the specified day
-    final dayEvents = events.where((event) => event.day == day).toList();
+    final dayEvents = events.where((event) => event.day == 'day-$day').toList();
 
     if (dayEvents.isEmpty) {
       return const Center(
@@ -193,17 +206,35 @@ class _AudiencehomeScreenMobileState extends ConsumerState<AudiencehomeScreenMob
       itemBuilder: (context, index) {
         final event = dayEvents[index];
         return SpeakerTile(
+          trailingIcon: isUser ? Assets.icons.eyeIcon.svg() : Assets.icons.questionMarkIcons.svg(),
           onTap: () {
-            context.goNamed(
-              AppRouter.askQuestion,
-            );
+            if (isUser) {
+              context.pushNamed(
+                AppRouter.reviewQuestions,
+                extra: {
+                  'eventId': event.eventId,
+                  'speakerName': event.speakerName,
+                  'eventTime': '${_formatTime(event.startTime)} - ${_formatTime(event.endTime)}',
+                },
+              );
+            } else {
+              context.pushNamed(
+                AppRouter.askQuestion,
+                extra: {
+                  'eventId': event.eventId,
+                  'speakerName': event.speakerName,
+                  'eventTime': '${_formatTime(event.startTime)} - ${_formatTime(event.endTime)}',
+                },
+              );
+              //Alert.showSnackBar('Please login to ask questions');
+            }
           },
           name: event.speakerName,
           time: '${_formatTime(event.startTime)} - ${_formatTime(event.endTime)}',
           speakerId: event.speakerId,
           eventId: event.eventId,
-          questionCount: event.questionCount,
-          pendingQuestions: event.pendingQuestionsCount,
+          questionCount: 0,
+          pendingQuestions: 0,
         );
       },
     );
@@ -228,24 +259,25 @@ class _AudiencehomeScreenMobileState extends ConsumerState<AudiencehomeScreenMob
 }
 
 class SpeakerTile extends StatelessWidget {
-  final String name;
-  final String time;
-  final int speakerId;
-  final int eventId;
-  final int questionCount;
-  final int pendingQuestions;
-  final VoidCallback onTap;
-
   const SpeakerTile({
-    super.key,
     required this.name,
     required this.time,
     required this.speakerId,
     required this.eventId,
     required this.questionCount,
-    this.pendingQuestions = 0,
     required this.onTap,
+    required this.trailingIcon,
+    this.pendingQuestions = 0,
+    super.key,
   });
+  final String name;
+  final String time;
+  final String speakerId;
+  final int eventId;
+  final int questionCount;
+  final int pendingQuestions;
+  final VoidCallback onTap;
+  final Widget trailingIcon;
 
   @override
   Widget build(BuildContext context) {
@@ -260,21 +292,8 @@ class SpeakerTile extends StatelessWidget {
         child: Row(
           children: [
             // Speaker icon (circle with face)
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-                border: Border.all(color: Colors.blue.shade300, width: 1),
-              ),
-              child: const Center(
-                child: Icon(
-                  Icons.person_outline,
-                  color: Colors.blue,
-                  size: 20,
-                ),
-              ),
+            Center(
+              child: Assets.icons.messageIcon.svg(),
             ),
 
             const SizedBox(width: 16),
@@ -315,27 +334,7 @@ class SpeakerTile extends StatelessWidget {
             ),
 
             // Question mark icon (now a button to add questions)
-            Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: const Color(0xFF2B6CA3),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: InkWell(
-                onTap: () {
-                  // Handle question action here
-                  // You can navigate to a question form or show a dialog
-                },
-                child: const Center(
-                  child: Icon(
-                    Icons.question_mark,
-                    color: Colors.white,
-                    size: 20,
-                  ),
-                ),
-              ),
-            ),
+            trailingIcon
           ],
         ),
       ),

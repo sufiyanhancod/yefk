@@ -163,17 +163,10 @@ class _AdminloginScreenMobileState extends ConsumerState<AdminloginScreenMobile>
                                           isLoading: ref.watch(authenticationNotifierProvider).status == AuthenticationStatus.loading,
                                           onPress: () {
                                             if (_formKey.currentState?.saveAndValidate() ?? false) {
-                                              ref
-                                                  .read(authenticationNotifierProvider.notifier)
-                                                  .signInWithEmail(
+                                              ref.read(authenticationNotifierProvider.notifier).signInWithEmail(
                                                     email: _formKey.currentState!.value['email'] as String,
                                                     password: _formKey.currentState!.value['password'] as String,
-                                                  )
-                                                  .then((value) {
-                                                if (value) {
-                                                  context.goNamed(AppRouter.audienceHome);
-                                                }
-                                              });
+                                                  );
                                             }
                                           },
                                           label: const Text(

@@ -1,5 +1,7 @@
 import 'package:app/features/auth/auth.dart';
 import 'package:app/features/home/presentation/home_presentation.dart';
+import 'package:app/features/home/presentation/moderator_home/moderatorhome.dart';
+import 'package:app/features/home/presentation/reviewquestions/reviewquestions.dart';
 import 'package:app/gen/assets.gen.dart';
 import 'package:app/l10n/l10n.dart';
 import 'package:app/shared/shared.dart';
@@ -64,16 +66,21 @@ class AppRouter {
   static const String audienceHome = 'audienceHome';
   static const String askQuestion = 'askQuestion';
   static const String adminSignup = 'adminSignup';
+
+//homes
+  static const String moderatorHome = 'moderatorHome';
+  static const String speakerHome = 'speakerHome';
+  static const String reviewQuestions = 'reviewQuestions';
   late final GoRouter router = GoRouter(
     navigatorKey: _rootNavigatorKey,
     debugLogDiagnostics: true,
-    initialLocation: '/$adminSignup',
+    initialLocation: '/$splash',
     routes: [
-      // GoRoute(
-      //   path: '/$splash',
-      //   name: splash,
-      //   builder: (context, state) => const SplashScreen(),
-      // ),
+      GoRoute(
+        path: '/$splash',
+        name: splash,
+        builder: (context, state) => const SplashScreen(),
+      ),
       GoRoute(
         path: '/$adminSignup',
         name: adminSignup,
@@ -92,12 +99,47 @@ class AppRouter {
       GoRoute(
         path: '/$askQuestion',
         name: askQuestion,
-        builder: (context, state) => const AskqestionScreen(),
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>;
+          final eventId = extra['eventId'] as int;
+          final speakerName = extra['speakerName'] as String;
+          final eventTime = extra['eventTime'] as String;
+          return AskqestionScreen(
+            eventId: eventId,
+            speakerName: speakerName,
+            eventTime: eventTime,
+          );
+        },
       ),
       GoRoute(
         path: '/$adminLogin',
         name: adminLogin,
         builder: (context, state) => const AdminloginScreenMobile(),
+      ),
+      GoRoute(
+        path: '/$moderatorHome',
+        name: moderatorHome,
+        builder: (context, state) => const ModeratorhomeScreen(),
+      ),
+      GoRoute(
+        path: '/$speakerHome',
+        name: speakerHome,
+        builder: (context, state) => const SpeakerhomeScreen(),
+      ),
+      GoRoute(
+        path: '/$reviewQuestions',
+        name: reviewQuestions,
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>;
+          final eventId = extra['eventId'] as int;
+          final speakerName = extra['speakerName'] as String;
+          final eventTime = extra['eventTime'] as String;
+          return ReviewquestionsScreen(
+            eventId: eventId,
+            speakerName: speakerName,
+            eventTime: eventTime,
+          );
+        },
       ),
       // GoRoute(
       //   path: '/$adminSignup',

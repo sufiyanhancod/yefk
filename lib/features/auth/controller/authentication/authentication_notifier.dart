@@ -1,4 +1,5 @@
 import 'package:app/features/auth/auth.dart';
+import 'package:app/shared/providers/supabase_provider/supabase_provider.dart';
 import 'package:app/shared/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -23,7 +24,15 @@ class AuthenticationNotifier extends _$AuthenticationNotifier {
       await _authRepository.signInWithEmail(email, password);
       state = state.copyWith(status: AuthenticationStatus.success);
       debugPrint('success');
-      AppRouter.goNamed(AppRouter.home);
+      final user = ref.read(supabaseProvider).auth.currentUser;
+      debugPrint('user: ${user?.appMetadata}');
+      if (user?.userMetadata?['user_type'] == 'MODERATOR') {
+        AppRouter.goNamed(AppRouter.audienceHome);
+      } else if (user?.userMetadata?['user_type'] == 'SPEAKER') {
+        AppRouter.goNamed(AppRouter.speakerHome);
+      } else {
+        AppRouter.goNamed(AppRouter.audienceHome);
+      }
       return true;
     } catch (e) {
       Alert.showSnackBar(e.toString());

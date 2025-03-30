@@ -15,13 +15,35 @@ class AskquestionRepository implements IAskquestionRepository {
   final AskquestionRepoRef ref;
 
   @override
-  Future<void> askQuestion(String question, String email, String name) async {
+  Future<void> askQuestion(String question, String email, String name, int eventId, String questionStatus) async {
     try {
       final response = await _supabaseClient.from('questions').insert({
-        'question': question,
-        'email': email,
+        'event_id': eventId,
+        'question_text': question,
+        'user_email': email,
         'name': name,
+        'question_status': questionStatus,
       });
+      return response;
+    } catch (e) {
+      throw AppException(e.toString());
+    }
+  }
+
+  @override
+  Future<List<Questiondetails>> getQuestionbyModerator(int eventId, String questionStatus) async {
+    try {
+      final response = await _supabaseClient.from('question_details_view').select('*').eq('event_id', eventId).eq('question_status', questionStatus);
+      return response.map(Questiondetails.fromJson).toList();
+    } catch (e) {
+      throw AppException(e.toString());
+    }
+  }
+
+  @override
+  Future<void> updateQuestionStatus(int questionId, String questionStatus) async {
+    try {
+      final response = await _supabaseClient.from('questions').update({'question_status': questionStatus}).eq('id', questionId);
       return response;
     } catch (e) {
       throw AppException(e.toString());

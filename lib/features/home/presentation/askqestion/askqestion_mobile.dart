@@ -1,19 +1,22 @@
+import 'package:app/features/home/controller/askquestion/askquestion_notifier.dart';
+import 'package:app/features/home/presentation/widgets/success_dialog.dart';
 import 'package:app/gen/assets.gen.dart';
+import 'package:app/shared/providers/supabase_provider/supabase_provider.dart';
+import 'package:app/shared/utils/router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hancod_theme/colors.dart';
 
 class AskqestionScreenMobile extends ConsumerStatefulWidget {
   const AskqestionScreenMobile({
     required this.eventId,
-    required this.speakerId,
     required this.speakerName,
     required this.eventTime,
     super.key,
   });
 
   final int eventId;
-  final int speakerId;
   final String speakerName;
   final String eventTime;
   @override
@@ -45,7 +48,7 @@ class _AskqestionScreenMobileState extends ConsumerState<AskqestionScreenMobile>
         ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: AppColors.black),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => context.pop(),
         ),
         actions: [
           IconButton(
@@ -247,15 +250,34 @@ class _AskqestionScreenMobileState extends ConsumerState<AskqestionScreenMobile>
               // Send button
               Expanded(
                 child: ElevatedButton(
-                  onPressed: () {
+                  onPressed: () async {
+                    String? email;
                     if (_questionController.text.trim().isNotEmpty) {
-                      // TODO: Implement sending question
-                      // Use: widget.eventId, widget.speakerId, _questionController.text
+                      if (ref.read(supabaseProvider).auth.currentUser != null) {
+                        email = ref.read(supabaseProvider).auth.currentUser?.email ?? '';
+                      } else {
+                        email = '';
+                      }
+                      await ref.read(askquestionNotifierProvider.notifier).askQuestion(
+                            questionStatus: ref.read(supabaseProvider).auth.currentUser != null ? 'ACCEPTED' : 'PENDING',
+                            question: _questionController.text,
+                            email: email,
+                            name: 'Test sufiyab',
+                            eventId: widget.eventId,
+                          );
 
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Question submitted successfully')),
-                      );
-                      Navigator.pop(context);
+                      if (context.mounted) {
+                        // Show success dialog instead of Snackbar
+                        await showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (context) => const SuccessDialog(),
+                        );
+                        // Optional: Navigate back after dialog is closed
+                        if (context.mounted) {
+                          context.goNamed(AppRouter.home);
+                        }
+                      }
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text('Please enter a question')),

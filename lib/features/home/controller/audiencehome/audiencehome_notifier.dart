@@ -27,4 +27,15 @@ class AudiencehomeNotifier extends _$AudiencehomeNotifier {
       state = state.copyWith(status: AudiencehomeStatus.error);
     }
   }
+
+  // Future<void> getModiratorEventSchedule(String userId) async {
+  //   state = state.copyWith(status: AudiencehomeStatus.loading);
+  //   try {
+  //     final eventSchedule = await _audiencehomeRepository.moderatorEventSchedule(userId);
+  //     state = state.copyWith(status: AudiencehomeStatus.success, );
+  //   } catch (e) {
+  //     Alert.showSnackBar(e.toString());
+  //     state = state.copyWith(status: AudiencehomeStatus.error);
+  //   }
+  // }
 }

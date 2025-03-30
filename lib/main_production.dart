@@ -12,12 +12,12 @@ Future<void> main() async {
   tz.initializeTimeZones();
 
   // for scaling purposes, if required use the below code
-  ScaledWidgetsFlutterBinding.ensureInitialized(
-    scaleFactor: (deviceSize) {
-      const widthOfDesign = 375;
-      return deviceSize.width / widthOfDesign;
-    },
-  );
+  // ScaledWidgetsFlutterBinding.ensureInitialized(
+  //   scaleFactor: (deviceSize) {
+  //     const widthOfDesign = 375;
+  //     return deviceSize.width / widthOfDesign;
+  //   },
+  // );
 
   // In case ScaledWidgetsFlutterBinding is not used
   // WidgetsFlutterBinding.ensureInitialized();

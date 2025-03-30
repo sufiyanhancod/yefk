@@ -17,10 +17,21 @@ class AudiencehomeRepository implements IAudiencehomeRepository {
   @override
   Future<List<EventSchedule>> eventSchedule() async {
     try {
-      final response = await _supabaseClient.from('event_schedule_view').select();
+      final response = await _supabaseClient.from('event_details').select();
+
       return response.map((e) => EventSchedule.fromJson(e)).toList();
     } catch (e) {
       throw AppException(e.toString());
     }
   }
+
+  // @override
+  // Future<List<EventSchedule>> moderatorEventSchedule(String userId) async {
+  //   try {
+  //     final response = await _supabaseClient.from('event_schedule_view').select();
+  //     return response.map((e) => EventSchedule.fromJson(e)).toList();
+  //   } catch (e) {
+  //     throw AppException(e.toString());
+  //   }
+  // }
 }

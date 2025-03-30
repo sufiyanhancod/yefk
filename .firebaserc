@@ -1,20 +1,20 @@
 {
     "projects": {
         "dev": "dev-proj-id",
-        "prod": "aurumneuro-c475c"
+        "prod": "yafk-2025"
     },
     "targets": {
-        "aurumneuro-c475c": {
+        "yafk-2025": {
             "hosting": {
                 "prod": [
-                    "aurumneuro-c475c"
+                    "yafk-2025"
                 ]
             }
         },
         "dev-proj-id": {
             "hosting": {
                 "dev": [
-                    "aurumneuro-c475c"
+                    "yafk-2025"
                 ]
             }
         }

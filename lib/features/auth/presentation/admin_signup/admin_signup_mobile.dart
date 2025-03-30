@@ -11,6 +11,10 @@ class AdminsignupScreenMobile extends ConsumerStatefulWidget {
 class _AdminsignupScreenMobileState extends ConsumerState<AdminsignupScreenMobile> {
   @override
   Widget build(BuildContext context) {
-    return const Scaffold();
+    return const Scaffold(
+      body: Center(
+        child: Text('Admin Signup'),
+      ),
+    );
   }
 }
