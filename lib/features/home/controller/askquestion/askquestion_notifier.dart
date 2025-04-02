@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:app/features/home/home.dart';
 import 'package:app/shared/utils/utils.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'askquestion_notifier.freezed.dart';
@@ -78,6 +79,20 @@ class AskquestionNotifier extends _$AskquestionNotifier {
     } catch (e) {
       Alert.showSnackBar(e.toString());
       state = state.copyWith(status: AskquestionStatus.error);
+    }
+  }
+
+  Future<bool> updateEventStatus(int eventId, String eventStatus) async {
+    try {
+      state = state.copyWith(eventStatus: AskquestionStatus.loading);
+      await _askquestionRepository.updateEventStatus(eventId, eventStatus);
+
+      state = state.copyWith(eventStatus: AskquestionStatus.success);
+      return true;
+    } catch (e) {
+      Alert.showSnackBar(e.toString());
+      state = state.copyWith(eventStatus: AskquestionStatus.error);
+      return false;
     }
   }
 }

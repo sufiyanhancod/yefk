@@ -189,7 +189,7 @@ class _AudiencehomeScreenMobileState extends ConsumerState<AudiencehomeScreenMob
   // New method to build events list for a specific day
   Widget _buildEventsList(List<EventSchedule> events, {required int day, required bool isUser}) {
     // Filter events for the specified day
-    final dayEvents = events.where((event) => event.day == 'day-$day').toList();
+    final dayEvents = events.where((event) => event.day == 'day-$day').toList()..sort((a, b) => _compareTime(a.startTime, b.startTime)); // Sort by start time
 
     if (dayEvents.isEmpty) {
       return const Center(
@@ -211,27 +211,32 @@ class _AudiencehomeScreenMobileState extends ConsumerState<AudiencehomeScreenMob
       itemBuilder: (context, index) {
         final event = dayEvents[index];
         return SpeakerTile(
+          tileColor: event.eventStatus ? AppColors.secondary : const Color(0xFFE0E0E0),
           trailingIcon: isUser ? Assets.icons.eyeIcon.svg() : Assets.icons.questionMarkIcons.svg(),
           onTap: () {
-            if (isUser) {
-              context.pushNamed(
-                AppRouter.reviewQuestions,
-                extra: {
-                  'eventId': event.eventId,
-                  'speakerName': event.speakerName,
-                  'eventTime': '${_formatTime(event.startTime)} - ${_formatTime(event.endTime)}',
-                },
-              );
-            } else {
-              context.pushNamed(
-                AppRouter.askQuestion,
-                extra: {
-                  'eventId': event.eventId,
-                  'speakerName': event.speakerName,
-                  'eventTime': '${_formatTime(event.startTime)} - ${_formatTime(event.endTime)}',
-                },
-              );
+            if (event.eventStatus) {
+              if (isUser) {
+                context.pushNamed(
+                  AppRouter.reviewQuestions,
+                  extra: {
+                    'eventId': event.eventId,
+                    'speakerName': event.speakerName,
+                    'eventTime': '${_formatTime(event.startTime)} - ${_formatTime(event.endTime)}',
+                  },
+                );
+              } else {
+                context.pushNamed(
+                  AppRouter.askQuestion,
+                  extra: {
+                    'eventId': event.eventId,
+                    'speakerName': event.speakerName,
+                    'eventTime': '${_formatTime(event.startTime)} - ${_formatTime(event.endTime)}',
+                  },
+                );
+              }
               //Alert.showSnackBar('Please login to ask questions');
+            } else {
+              Alert.showSnackBar('Speaker is disabled');
             }
           },
           name: event.speakerName,
@@ -261,10 +266,25 @@ class _AudiencehomeScreenMobileState extends ConsumerState<AudiencehomeScreenMob
 
     return '$hour.$minute $period';
   }
+
+  // Add this helper method for time comparison
+  int _compareTime(String time1, String time2) {
+    // Convert time strings to comparable format
+    final t1Parts = time1.split(':').map(int.parse).toList();
+    final t2Parts = time2.split(':').map(int.parse).toList();
+
+    // Compare hours first
+    if (t1Parts[0] != t2Parts[0]) {
+      return t1Parts[0].compareTo(t2Parts[0]);
+    }
+    // If hours are same, compare minutes
+    return t1Parts[1].compareTo(t2Parts[1]);
+  }
 }
 
 class SpeakerTile extends StatelessWidget {
   const SpeakerTile({
+    required this.tileColor,
     required this.name,
     required this.time,
     required this.speakerId,
@@ -283,6 +303,7 @@ class SpeakerTile extends StatelessWidget {
   final int pendingQuestions;
   final VoidCallback onTap;
   final Widget trailingIcon;
+  final Color tileColor;
 
   @override
   Widget build(BuildContext context) {
@@ -291,7 +312,7 @@ class SpeakerTile extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: Colors.grey.shade100,
+          color: tileColor,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
@@ -339,7 +360,7 @@ class SpeakerTile extends StatelessWidget {
             ),
 
             // Question mark icon (now a button to add questions)
-            trailingIcon
+            trailingIcon,
           ],
         ),
       ),

@@ -5,4 +5,5 @@ abstract class IAskquestionRepository {
   Future<List<Questiondetails>> getQuestionbyModerator(int eventId, String questionStatus);
   Future<void> updateQuestionStatus(int questionId, String questionStatus);
   Future<List<Questiondetails>> getQuestionbySpeaker(String userId, String questionStatus);
+  Future<void> updateEventStatus(int eventId, String eventStatus);
 }

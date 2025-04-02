@@ -31,6 +31,7 @@ extension AskquestionStatusExtension on AskquestionStatus {
 class AskquestionState with _$AskquestionState {
   const factory AskquestionState({
     @Default(AskquestionStatus.initial) AskquestionStatus status,
+    @Default(AskquestionStatus.initial) AskquestionStatus eventStatus,
     @Default([]) List<Questiondetails> question,
   }) = _AskquestionState;
 

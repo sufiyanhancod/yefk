@@ -71,6 +71,7 @@ class AppRouter {
   static const String moderatorHome = 'moderatorHome';
   static const String speakerHome = 'speakerHome';
   static const String reviewQuestions = 'reviewQuestions';
+  static const String previousQuestions = 'previousQuestions';
   late final GoRouter router = GoRouter(
     navigatorKey: _rootNavigatorKey,
     debugLogDiagnostics: true,
@@ -140,6 +141,11 @@ class AppRouter {
             eventTime: eventTime,
           );
         },
+      ),
+      GoRoute(
+        path: '/$previousQuestions',
+        name: previousQuestions,
+        builder: (context, state) => const PreviousquestionsScreenMobile(),
       ),
       // GoRoute(
       //   path: '/$adminSignup',
@@ -326,30 +332,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        //   mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Spacer(flex: 4),
-          Assets.images.yefkLogo.image(),
-          const Spacer(),
-
-          //const Spacer(flex: 2),
-          // Column(
-          //   children: [
-          //     ConstrainedBox(
-          //       constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width),
-          //       child: Assets.icons.layer.image(
-          //         fit: BoxFit.fill,
-          //       ),
-          //     ),
-          //     const SizedBox(height: 16),
-          //     const Text('Powered By', style: AppText.xLargeN),
-          //     Assets.images.hancodLogoOrginal.image(),
-          //     const SizedBox(height: 25),
-          //   ],
-          // ),
-        ],
-      ),
-    );
+        body: Center(
+      child: Assets.images.yefkLogo.image(),
+    ));
   }
 }

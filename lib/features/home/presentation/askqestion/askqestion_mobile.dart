@@ -79,7 +79,7 @@ class _AskqestionScreenMobileState extends ConsumerState<AskqestionScreenMobile>
   InkWell previousAskContainer() {
     return InkWell(
       onTap: () {
-        // TODO: Navigate to previously asked questions screen
+        context.pushNamed(AppRouter.previousQuestions);
       },
       child: Container(
         padding: const EdgeInsets.all(16),

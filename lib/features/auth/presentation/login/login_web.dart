@@ -113,6 +113,7 @@ class _LoginScreenWebState extends ConsumerState<LoginScreenWeb> {
                                           ),
                                         ),
                                       ),
+                                      const SizedBox(height: 20),
                                       // Name Field
                                       const Text(
                                         'Email',

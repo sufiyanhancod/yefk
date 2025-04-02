@@ -62,4 +62,15 @@ class AskquestionRepository implements IAskquestionRepository {
       throw AppException(e.toString());
     }
   }
+
+  @override
+  Future<void> updateEventStatus(int eventId, String eventStatus) async {
+    try {
+      final response = await _supabaseClient.from('events').update({'event_status': eventStatus}).eq('id', eventId);
+      return response;
+    } catch (e) {
+      debugPrint(e.toString());
+      throw AppException(e.toString());
+    }
+  }
 }
