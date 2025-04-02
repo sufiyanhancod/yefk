@@ -1,6 +1,7 @@
 import 'package:app/features/home/controller/askquestion/askquestion_notifier.dart';
 import 'package:app/features/home/presentation/widgets/success_dialog.dart';
 import 'package:app/gen/assets.gen.dart';
+import 'package:app/shared/providers/shared_prefs_provider/shared_prefs_provider.dart';
 import 'package:app/shared/providers/supabase_provider/supabase_provider.dart';
 import 'package:app/shared/utils/router.dart';
 import 'package:flutter/material.dart';
@@ -252,17 +253,21 @@ class _AskqestionScreenMobileState extends ConsumerState<AskqestionScreenMobile>
                 child: ElevatedButton(
                   onPressed: () async {
                     String? email;
+                    String? name;
                     if (_questionController.text.trim().isNotEmpty) {
                       if (ref.read(supabaseProvider).auth.currentUser != null) {
                         email = ref.read(supabaseProvider).auth.currentUser?.email ?? '';
+                        name = ref.read(supabaseProvider).auth.currentUser?.userMetadata?['name'] as String;
                       } else {
-                        email = '';
+                        final prefs = await ref.read(sharedPrefsProvider.future);
+                        email = prefs.getString('email') ?? '';
+                        name = prefs.getString('name') ?? '';
                       }
                       await ref.read(askquestionNotifierProvider.notifier).askQuestion(
                             questionStatus: ref.read(supabaseProvider).auth.currentUser != null ? 'ACCEPTED' : 'PENDING',
                             question: _questionController.text,
                             email: email,
-                            name: 'Test sufiyab',
+                            name: name,
                             eventId: widget.eventId,
                           );
 

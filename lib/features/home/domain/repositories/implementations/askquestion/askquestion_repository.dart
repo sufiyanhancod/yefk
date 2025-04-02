@@ -1,5 +1,6 @@
 import 'package:app/shared/providers/supabase_provider/supabase_provider.dart';
 import 'package:app/shared/utils/app_exectpion.dart';
+import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:app/features/home/home.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -46,6 +47,18 @@ class AskquestionRepository implements IAskquestionRepository {
       final response = await _supabaseClient.from('questions').update({'question_status': questionStatus}).eq('id', questionId);
       return response;
     } catch (e) {
+      throw AppException(e.toString());
+    }
+  }
+
+  @override
+  Future<List<Questiondetails>> getQuestionbySpeaker(String userId, String questionStatus) async {
+    try {
+      final response = await _supabaseClient.from('question_details_view').select('*').eq('speaker_id', userId).inFilter('question_status', ['ACCEPTED', 'ANSWERED']).order('question_status', ascending: false);
+
+      return response.map(Questiondetails.fromJson).toList();
+    } catch (e) {
+      debugPrint(e.toString());
       throw AppException(e.toString());
     }
   }

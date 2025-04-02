@@ -46,11 +46,34 @@ class AskquestionNotifier extends _$AskquestionNotifier {
     }
   }
 
+  Future<void> getQuestionbySpeaker(String userId, String questionStatus) async {
+    try {
+      state = state.copyWith(status: AskquestionStatus.loading);
+      final question = await _askquestionRepository.getQuestionbySpeaker(userId, questionStatus);
+      state = state.copyWith(status: AskquestionStatus.success, question: question);
+    } catch (e) {
+      Alert.showSnackBar(e.toString());
+      state = state.copyWith(status: AskquestionStatus.error);
+    }
+  }
+
   Future<void> updateQuestionStatus(int questionId, String questionStatus, int eventId) async {
     try {
       state = state.copyWith(status: AskquestionStatus.loading);
       await _askquestionRepository.updateQuestionStatus(questionId, questionStatus);
       unawaited(getQuestionbyModerator(eventId, 'PENDING'));
+      state = state.copyWith(status: AskquestionStatus.success);
+    } catch (e) {
+      Alert.showSnackBar(e.toString());
+      state = state.copyWith(status: AskquestionStatus.error);
+    }
+  }
+
+  Future<void> updatespeackerQStatus(int questionId, String questionStatus, String userId) async {
+    try {
+      state = state.copyWith(status: AskquestionStatus.loading);
+      await _askquestionRepository.updateQuestionStatus(questionId, questionStatus);
+      unawaited(getQuestionbySpeaker(userId, 'PENDING'));
       state = state.copyWith(status: AskquestionStatus.success);
     } catch (e) {
       Alert.showSnackBar(e.toString());

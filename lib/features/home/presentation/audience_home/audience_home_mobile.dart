@@ -39,6 +39,8 @@ class _AudiencehomeScreenMobileState extends ConsumerState<AudiencehomeScreenMob
 
   @override
   Widget build(BuildContext context) {
+    //final authState = ref.watch(supabaseProvider).auth.currentUser;
+    //  debugPrint(authState?.userMetadata?['name'] as String);
     final eventScheduleState = ref.watch(audiencehomeNotifierProvider);
     return DefaultTabController(
       length: 2,
@@ -55,8 +57,11 @@ class _AudiencehomeScreenMobileState extends ConsumerState<AudiencehomeScreenMob
           ),
           actions: [
             IconButton(
-              onPressed: () {},
-              icon: const Icon(Icons.more_vert, color: Colors.white),
+              onPressed: () {
+                ref.read(supabaseProvider).auth.signOut();
+                context.goNamed(AppRouter.login);
+              },
+              icon: const Icon(Icons.logout, color: Colors.white),
             ),
           ],
         ),
@@ -66,7 +71,7 @@ class _AudiencehomeScreenMobileState extends ConsumerState<AudiencehomeScreenMob
               children: [
                 // Top section with background and download button
                 SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.4,
+                  height: MediaQuery.of(context).size.height * 0.5,
                   width: double.infinity,
                   child: Stack(
                     children: [

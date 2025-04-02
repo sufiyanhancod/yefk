@@ -98,6 +98,7 @@ class AuthRepository implements IAuthRepository {
         data: {
           'user_type': userType,
           'email_confirmed_at': DateTime.now().toIso8601String(), // Auto-confirm email
+          'name': name,
         },
       );
 
@@ -115,16 +116,16 @@ class AuthRepository implements IAuthRepository {
       });
 
       // If user is a SPEAKER, add them to the speakers table
-      if (userType == 'SPEAKER') {
-        // First get the numeric ID from the users table
-        final userResult = await _supabaseClient.from('users').select('id').eq('id', userId).single();
+      // if (userType == 'SPEAKER') {
+      //   // First get the numeric ID from the users table
+      //   final userResult = await _supabaseClient.from('users').select('id').eq('id', userId).single();
 
-        // Add to speakers table
-        await _supabaseClient.from('speakers').insert({
-          'user_id': userResult['id'],
-          'name': name,
-        });
-      }
+      //   // Add to speakers table
+      //   await _supabaseClient.from('speakers').insert({
+      //     'user_id': userResult['id'],
+      //     'name': name,
+      //   });
+      // }
 
       debugPrint('User created successfully with type: $userType');
     } on PostgrestException catch (e) {
