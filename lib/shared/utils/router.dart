@@ -167,32 +167,30 @@ class AppRouter {
     ],
     refreshListenable: Listenable.merge([authState]),
     redirect: (context, state) {
-      return null;
+      // // Handle auth state redirects
+      // if (authState.value == null || authState.value!.isLoading) {
+      //   // Show splash while loading initial auth state
+      //   return state.uri.path == '/$splash' ? null : '/$splash';
+      // }
 
-      /// Auth reirection flow
-      /*   if (authState.value == null) {
-        return null;
-      }
-      if (authState.value!.unwrapPrevious().hasError) {
-        // Return Login Route
-        return AppRouter.login;
-      }
-      if (authState.value!.isLoading || !authState.value!.hasValue) {
-        // Return Splash Route
-        return AppRouter.splash;
-      }
+      // // Get current path without leading slash
+      // final currentPath = state.uri.path.replaceFirst('/', '');
 
-      final isAuth = !(authState.value!.value?.session?.isExpired ?? true);
+      // // Check if user has stored credentials
+      // final hasStoredCredentials = ref.read(sharedPrefsProvider).hasValue && (ref.read(sharedPrefsProvider).value?.getString('email') != null && ref.read(sharedPrefsProvider).value?.getString('name') != null);
 
-      final isSplash = state.uri.path == AppRouter.splash;
-      if (isSplash) {
-        return isAuth ? AppRouter.home : AppRouter.login;
-      }
+      // // Handle splash screen redirects
+      // if (currentPath == splash) {
+      //   if (hasStoredCredentials) {
+      //     return '/$audienceHome';
+      //   } else {
+      //     final isAuth = !(authState.value!.value?.session?.isExpired ?? true);
+      //     return isAuth ? '/home' : '/$login';
+      //   }
+      // }
 
-      final isLoggingIn = state.uri.path == AppRouter.login;
-      if (isLoggingIn) return isAuth ? AppRouter.home : null;
-
-      return isAuth ? null : AppRouter.splash; */
+      // // Allow access to other routes
+      // return null;
     },
   );
 
@@ -313,7 +311,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
     try {
       final prefs = await ref.read(sharedPrefsProvider.future);
       final email = prefs.getString('email');
-      final phoneNumber = prefs.getString('phoneNumber');
+      final phoneNumber = prefs.getString('name');
 
       await Future.delayed(const Duration(seconds: 3));
 
@@ -336,8 +334,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: Center(
-      child: Assets.images.yefkLogo.image(),
-    ));
+      body: Center(
+        child: Assets.images.yefkLogo.image(),
+      ),
+    );
   }
 }

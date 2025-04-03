@@ -49,12 +49,12 @@ class _AudiencehomeScreenMobileState extends ConsumerState<AudiencehomeScreenMob
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.white),
-            onPressed: () {
-              Navigator.pop(context);
-            },
-          ),
+          // leading: IconButton(
+          //   icon: const Icon(Icons.arrow_back, color: Colors.white),
+          //   onPressed: () {
+          //     Navigator.pop(context);
+          //   },
+          // ),
           actions: [
             IconButton(
               onPressed: () {

@@ -17,8 +17,16 @@ class _SpeakerhomeScreenMobileState extends ConsumerState<SpeakerhomeScreenMobil
   void initState() {
     super.initState();
     Future.microtask(() {
-      ref.read(askquestionNotifierProvider.notifier).getQuestionbySpeaker(ref.read(supabaseProvider).auth.currentUser!.id, 'ACCEPTED');
+      ref.read(askquestionNotifierProvider.notifier).subscribeToQuestions(
+            ref.read(supabaseProvider).auth.currentUser!.id,
+          );
     });
+  }
+
+  @override
+  void dispose() {
+    ref.read(askquestionNotifierProvider.notifier).dispose();
+    super.dispose();
   }
 
   @override
@@ -45,16 +53,8 @@ class _SpeakerhomeScreenMobileState extends ConsumerState<SpeakerhomeScreenMobil
       body: switch (ref.watch(askquestionNotifierProvider).status) {
         AskquestionStatus.loading => const Center(child: CircularProgressIndicator()),
         AskquestionStatus.error => const Center(child: Text('Error')),
-        AskquestionStatus.success => ref.watch(askquestionNotifierProvider).question.isEmpty
-            ? const Center(
-                child: Text(
-                  'No Questions Available',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.grey,
-                  ),
-                ),
-              )
+        AskquestionStatus.success || AskquestionStatus.subscribed => ref.watch(askquestionNotifierProvider).question.isEmpty
+            ? const Center(child: Text('No Questions Available'))
             : ListView.builder(
                 padding: const EdgeInsets.all(16),
                 itemCount: ref.watch(askquestionNotifierProvider).question.length,

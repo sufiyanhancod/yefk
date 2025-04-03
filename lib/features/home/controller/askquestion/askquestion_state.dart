@@ -5,15 +5,11 @@ enum AskquestionStatus {
   loading,
   success,
   error,
+  subscribed,
 }
 
 extension AskquestionStatusExtension on AskquestionStatus {
-  R when<R>({
-    required R Function() initial,
-    required R Function() loading,
-    required R Function() success,
-    required R Function() error,
-  }) {
+  R when<R>({required R Function() initial, required R Function() loading, required R Function() success, required R Function() error, required R Function() subscribed}) {
     switch (this) {
       case AskquestionStatus.initial:
         return initial();
@@ -23,6 +19,8 @@ extension AskquestionStatusExtension on AskquestionStatus {
         return success();
       case AskquestionStatus.error:
         return error();
+      case AskquestionStatus.subscribed:
+        return subscribed();
     }
   }
 }

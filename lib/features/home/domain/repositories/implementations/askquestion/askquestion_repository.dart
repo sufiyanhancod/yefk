@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:app/shared/providers/supabase_provider/supabase_provider.dart';
 import 'package:app/shared/utils/app_exectpion.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +16,7 @@ class AskquestionRepository implements IAskquestionRepository {
   AskquestionRepository(this.ref) : _supabaseClient = ref.watch(supabaseProvider);
   final SupabaseClient _supabaseClient;
   final AskquestionRepoRef ref;
+  RealtimeChannel? _questionSubscription;
 
   @override
   Future<void> askQuestion(String question, String email, String name, int eventId, String questionStatus) async {
@@ -82,5 +85,35 @@ class AskquestionRepository implements IAskquestionRepository {
     } catch (e) {
       throw AppException(e.toString());
     }
+  }
+
+  @override
+  Stream<List<Questiondetails>> subscribeToQuestions(String userId) {
+    final controller = StreamController<List<Questiondetails>>();
+
+    _questionSubscription = _supabaseClient
+        .channel('public:question_details_view')
+        .onPostgresChanges(
+          event: PostgresChangeEvent.all,
+          schema: 'public',
+          table: 'questions',
+          callback: (payload) async {
+            try {
+              final response = await _supabaseClient.from('question_details_view').select('*').eq('speaker_id', userId).inFilter('question_status', ['ACCEPTED', 'ANSWERED']).order('question_status', ascending: false);
+
+              controller.add(response.map(Questiondetails.fromJson).toList());
+            } catch (e) {
+              debugPrint(e.toString());
+            }
+          },
+        )
+        .subscribe();
+
+    return controller.stream;
+  }
+
+  @override
+  void disposeSubscription() {
+    _questionSubscription?.unsubscribe();
   }
 }

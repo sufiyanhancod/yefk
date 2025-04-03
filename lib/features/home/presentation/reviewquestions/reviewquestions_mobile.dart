@@ -153,6 +153,7 @@ class _ReviewquestionsScreenMobileState extends ConsumerState<ReviewquestionsScr
           ),
         AskquestionStatus.error => const Center(child: Text('Error')),
         AskquestionStatus.initial => const Center(child: Text('Initial')),
+        AskquestionStatus.subscribed => const Center(child: Text('subscribed')),
       },
     );
   }

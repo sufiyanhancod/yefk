@@ -10,9 +10,11 @@ part 'askquestion_notifier.freezed.dart';
 part 'askquestion_notifier.g.dart';
 part 'askquestion_state.dart';
 
-@Riverpod(keepAlive: false)
+@Riverpod(keepAlive: true)
 class AskquestionNotifier extends _$AskquestionNotifier {
   late final IAskquestionRepository _askquestionRepository;
+  StreamSubscription<List<Questiondetails>>? _subscription;
+
   @override
   AskquestionState build() {
     _askquestionRepository = ref.read(askquestionRepoProvider);
@@ -105,5 +107,41 @@ class AskquestionNotifier extends _$AskquestionNotifier {
       Alert.showSnackBar(e.toString());
       state = state.copyWith(status: AskquestionStatus.error);
     }
+  }
+
+  void subscribeToQuestions(String userId) async {
+    state = state.copyWith(status: AskquestionStatus.loading);
+
+    // Fetch initial data immediately
+    try {
+      final initialQuestions = await _askquestionRepository.getQuestionbySpeaker(userId, 'ACCEPTED');
+      state = state.copyWith(
+        status: AskquestionStatus.success,
+        question: initialQuestions,
+      );
+    } catch (e) {
+      Alert.showSnackBar(e.toString());
+    }
+
+    // Set up subscription for future updates
+    _subscription = _askquestionRepository.subscribeToQuestions(userId).listen(
+      (questions) {
+        state = state.copyWith(
+          status: AskquestionStatus.subscribed,
+          question: questions,
+        );
+      },
+      onError: (error) {
+        Alert.showSnackBar(error.toString());
+        state = state.copyWith(status: AskquestionStatus.error);
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    _subscription?.cancel();
+    _askquestionRepository.disposeSubscription();
+//
   }
 }
