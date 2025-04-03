@@ -86,7 +86,7 @@ class _AudiencehomeScreenMobileState extends ConsumerState<AudiencehomeScreenMob
                       // Download button
                       Center(
                         child: ElevatedButton.icon(
-                          onPressed: () => _downloadPdfWeb('https://ngmqewfobapfktlshmkv.supabase.co/storage/v1/object/public/assets//YAFK%20Sponsor%20Brochure.pdf'),
+                          onPressed: () => _downloadPdfWeb('https://ngmqewfobapfktlshmkv.supabase.co/storage/v1/object/public/assets//YAF.K%20Brochure-1.pdf'),
                           icon: const Icon(Icons.download, color: Colors.white),
                           label: const Text(
                             'DOWNLOAD BROCHURE',

@@ -95,4 +95,15 @@ class AskquestionNotifier extends _$AskquestionNotifier {
       return false;
     }
   }
+
+  Future<void> getPreviousQuestions(String email, int eventId) async {
+    try {
+      state = state.copyWith(status: AskquestionStatus.loading);
+      final question = await _askquestionRepository.getPreviousQuestions(email, eventId);
+      state = state.copyWith(status: AskquestionStatus.success, question: question);
+    } catch (e) {
+      Alert.showSnackBar(e.toString());
+      state = state.copyWith(status: AskquestionStatus.error);
+    }
+  }
 }

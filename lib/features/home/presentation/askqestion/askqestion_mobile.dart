@@ -53,8 +53,11 @@ class _AskqestionScreenMobileState extends ConsumerState<AskqestionScreenMobile>
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.more_vert, color: AppColors.black),
-            onPressed: () {},
+            icon: const Icon(Icons.logout, color: AppColors.black),
+            onPressed: () {
+              ref.read(supabaseProvider).auth.signOut();
+              context.goNamed(AppRouter.login);
+            },
           ),
         ],
       ),
@@ -79,7 +82,7 @@ class _AskqestionScreenMobileState extends ConsumerState<AskqestionScreenMobile>
   InkWell previousAskContainer() {
     return InkWell(
       onTap: () {
-        context.pushNamed(AppRouter.previousQuestions);
+        context.pushNamed(AppRouter.previousQuestions, extra: {'eventId': widget.eventId});
       },
       child: Container(
         padding: const EdgeInsets.all(16),
@@ -280,7 +283,7 @@ class _AskqestionScreenMobileState extends ConsumerState<AskqestionScreenMobile>
                         );
                         // Optional: Navigate back after dialog is closed
                         if (context.mounted) {
-                          context.goNamed(AppRouter.home);
+                          context.goNamed(AppRouter.audienceHome);
                         }
                       }
                     } else {

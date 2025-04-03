@@ -47,8 +47,11 @@ class _ReviewquestionsScreenMobileState extends ConsumerState<ReviewquestionsScr
         title: const Text('Review Questions'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.more_vert),
-            onPressed: () {},
+            icon: const Icon(Icons.logout),
+            onPressed: () {
+              ref.read(supabaseProvider).auth.signOut();
+              context.goNamed(AppRouter.login);
+            },
             color: AppColors.black,
           ),
         ],
@@ -122,6 +125,30 @@ class _ReviewquestionsScreenMobileState extends ConsumerState<ReviewquestionsScr
                 ),
               ),
               // Bottom button
+              // Bottom button
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      context.pushNamed(AppRouter.askQuestion, extra: {
+                        'eventId': widget.eventId,
+                        'speakerName': widget.speakerName,
+                        'eventTime': widget.eventTime,
+                      });
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primaryColor,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                    ),
+                    child: const Text(
+                      'Ask Question',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                ),
+              ),
             ],
           ),
         AskquestionStatus.error => const Center(child: Text('Error')),

@@ -101,7 +101,7 @@ class AppRouter {
         path: '/$askQuestion',
         name: askQuestion,
         builder: (context, state) {
-          final extra = state.extra as Map<String, dynamic>;
+          final extra = state.extra! as Map<String, dynamic>;
           final eventId = extra['eventId'] as int;
           final speakerName = extra['speakerName'] as String;
           final eventTime = extra['eventTime'] as String;
@@ -145,7 +145,11 @@ class AppRouter {
       GoRoute(
         path: '/$previousQuestions',
         name: previousQuestions,
-        builder: (context, state) => const PreviousquestionsScreenMobile(),
+        builder: (context, state) {
+          final extra = state.extra! as Map<String, dynamic>;
+          final eventId = extra['eventId'] as int;
+          return PreviousquestionsScreen(eventId: eventId);
+        },
       ),
       // GoRoute(
       //   path: '/$adminSignup',
@@ -319,7 +323,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
       } else {
         // No user data, check auth status and navigate accordingly
         AppRouter.go(
-          AppRouter.read(supabaseProvider).auth.currentSession?.isExpired ?? true ? '/login' : '/home',
+          AppRouter.read(supabaseProvider).auth.currentSession?.isExpired ?? true ? '/login' : '/ ',
         );
       }
     } catch (e) {

@@ -73,4 +73,14 @@ class AskquestionRepository implements IAskquestionRepository {
       throw AppException(e.toString());
     }
   }
+
+  @override
+  Future<List<Questiondetails>> getPreviousQuestions(String email, int eventId) async {
+    try {
+      final response = await _supabaseClient.from('question_details_view').select('*').eq('user_email', email).eq('event_id', eventId).order('created_at', ascending: false);
+      return response.map(Questiondetails.fromJson).toList();
+    } catch (e) {
+      throw AppException(e.toString());
+    }
+  }
 }

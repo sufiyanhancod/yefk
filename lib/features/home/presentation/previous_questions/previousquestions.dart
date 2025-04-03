@@ -7,13 +7,13 @@ export 'previousquestions_mobile.dart';
 export 'previousquestions_web.dart';
 
 class PreviousquestionsScreen extends ConsumerWidget {
-  const PreviousquestionsScreen({super.key});
-
+  const PreviousquestionsScreen({super.key, required this.eventId});
+  final int eventId;
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return const Scaffold(
+    return Scaffold(
       body: ResponsiveWidget(
-        smallScreen: PreviousquestionsScreenMobile(),
+        smallScreen: PreviousquestionsScreenMobile(eventId: eventId),
         largeScreen: PreviousquestionsScreenWeb(),
       ),
     );

@@ -2,6 +2,7 @@ import 'package:app/features/home/home.dart';
 import 'package:app/shared/shared.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hancod_theme/hancod_theme.dart';
 
 class SpeakerhomeScreenMobile extends ConsumerStatefulWidget {
@@ -31,6 +32,15 @@ class _SpeakerhomeScreenMobileState extends ConsumerState<SpeakerhomeScreenMobil
         ),
         backgroundColor: Colors.white,
         elevation: 0,
+        actions: [
+          IconButton(
+            onPressed: () {
+              ref.read(supabaseProvider).auth.signOut();
+              context.goNamed(AppRouter.login);
+            },
+            icon: const Icon(Icons.logout, color: Colors.black),
+          ),
+        ],
       ),
       body: switch (ref.watch(askquestionNotifierProvider).status) {
         AskquestionStatus.loading => const Center(child: CircularProgressIndicator()),
