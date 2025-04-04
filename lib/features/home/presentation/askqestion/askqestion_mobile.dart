@@ -283,7 +283,8 @@ class _AskqestionScreenMobileState extends ConsumerState<AskqestionScreenMobile>
                         );
                         // Optional: Navigate back after dialog is closed
                         if (context.mounted) {
-                          context.goNamed(AppRouter.audienceHome);
+                          _questionController.clear();
+                          //    context.goNamed(AppRouter.audienceHome);
                         }
                       }
                     } else {

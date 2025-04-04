@@ -42,146 +42,169 @@ class _AudiencehomeScreenMobileState extends ConsumerState<AudiencehomeScreenMob
     //final authState = ref.watch(supabaseProvider).auth.currentUser;
     //  debugPrint(authState?.userMetadata?['name'] as String);
     final eventScheduleState = ref.watch(audiencehomeNotifierProvider);
-    return DefaultTabController(
-      length: 2,
-      child: Scaffold(
-        extendBodyBehindAppBar: true,
-        appBar: AppBar(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          // leading: IconButton(
-          //   icon: const Icon(Icons.arrow_back, color: Colors.white),
-          //   onPressed: () {
-          //     Navigator.pop(context);
-          //   },
-          // ),
-          actions: [
-            IconButton(
-              onPressed: () {
-                ref.read(supabaseProvider).auth.signOut();
-                context.goNamed(AppRouter.login);
-              },
-              icon: const Icon(Icons.logout, color: Colors.white),
-            ),
-          ],
-        ),
-        body: switch (eventScheduleState.status) {
-          AudiencehomeStatus.loading => const Center(child: CircularProgressIndicator(color: AppColors.white)),
-          AudiencehomeStatus.success => Column(
-              children: [
-                // Top section with background and download button
-                SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.5,
-                  width: double.infinity,
-                  child: Stack(
-                    children: [
-                      // Blue background with Y pattern
-                      Positioned.fill(
-                        child: Container(
-                          color: AppColors.primaryColor,
-                          child: Assets.images.homeBackground.image(fit: BoxFit.cover),
-                        ),
-                      ),
-
-                      // Download button
-                      Center(
-                        child: ElevatedButton.icon(
-                          onPressed: () => _downloadPdfWeb('https://ngmqewfobapfktlshmkv.supabase.co/storage/v1/object/public/assets//YAF.K%20Brochure-1.pdf'),
-                          icon: const Icon(Icons.download, color: Colors.white),
-                          label: const Text(
-                            'DOWNLOAD BROCHURE',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue.shade500,
-                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                // Bottom section with tabs and content
-                Expanded(
-                  child: Container(
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(30),
-                        topRight: Radius.circular(30),
-                      ),
-                    ),
-                    child: Column(
+    return WillPopScope(
+      onWillPop: () async {
+        final shouldPop = await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Exit App'),
+            content: const Text('Are you sure you want to exit?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('No'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text('Yes'),
+              ),
+            ],
+          ),
+        );
+        return shouldPop ?? false;
+      },
+      child: DefaultTabController(
+        length: 2,
+        child: Scaffold(
+          extendBodyBehindAppBar: true,
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            automaticallyImplyLeading: false,
+            // leading: IconButton(
+            //   icon: const Icon(Icons.arrow_back, color: Colors.white),
+            //   onPressed: () {
+            //     Navigator.pop(context);
+            //   },
+            // ),
+            actions: [
+              IconButton(
+                onPressed: () {
+                  ref.read(supabaseProvider).auth.signOut();
+                  context.goNamed(AppRouter.login);
+                },
+                icon: const Icon(Icons.logout, color: Colors.white),
+              ),
+            ],
+          ),
+          body: switch (eventScheduleState.status) {
+            AudiencehomeStatus.loading => const Center(child: CircularProgressIndicator(color: AppColors.white)),
+            AudiencehomeStatus.success => Column(
+                children: [
+                  // Top section with background and download button
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.5,
+                    width: double.infinity,
+                    child: Stack(
                       children: [
-                        // TabBar in blue container
-                        Container(
-                          decoration: const BoxDecoration(
-                            // color: Color(0xFF2E70A9),
-                            borderRadius: BorderRadius.only(
-                              topLeft: Radius.circular(30),
-                              topRight: Radius.circular(30),
-                            ),
-                          ),
-                          child: const Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // Tab bar
-                              TabBar(
-                                labelColor: Colors.black,
-                                unselectedLabelColor: Color(0xff3c3c4366),
-                                indicatorColor: Color(0xFF2E70A9),
-                                indicatorSize: TabBarIndicatorSize.tab,
-                                tabs: [
-                                  Tab(text: 'DAY 1'),
-                                  Tab(text: 'DAY 2'),
-                                ],
-                              ),
-
-                              // Speakers title
-                              Padding(
-                                padding: EdgeInsets.only(left: 16, top: 20, bottom: 10),
-                                child: Text(
-                                  'Speakers',
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w500,
-                                    color: Colors.black,
-                                  ),
-                                ),
-                              ),
-                            ],
+                        // Blue background with Y pattern
+                        Positioned.fill(
+                          child: Container(
+                            color: AppColors.primaryColor,
+                            child: Assets.images.homeBackground.image(fit: BoxFit.cover),
                           ),
                         ),
 
-                        // TabBarView with speakers list from API data
-                        Expanded(
-                          child: TabBarView(
-                            children: [
-                              // Day 1 Content
-                              _buildEventsList(eventScheduleState.eventSchedule ?? [], day: 1, isUser: ref.watch(supabaseProvider).auth.currentUser != null),
-
-                              // Day 2 Content
-                              _buildEventsList(eventScheduleState.eventSchedule ?? [], day: 2, isUser: ref.watch(supabaseProvider).auth.currentUser != null),
-                            ],
+                        // Download button
+                        Center(
+                          child: ElevatedButton.icon(
+                            onPressed: () => _downloadPdfWeb('https://ngmqewfobapfktlshmkv.supabase.co/storage/v1/object/public/assets//YAF.K%20Brochure-1.pdf'),
+                            icon: const Icon(Icons.download, color: Colors.white),
+                            label: const Text(
+                              'DOWNLOAD BROCHURE',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.blue.shade500,
+                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
                           ),
                         ),
                       ],
                     ),
                   ),
-                ),
-              ],
-            ),
-          AudiencehomeStatus.error => const Center(child: Text('Error loading events')),
-          AudiencehomeStatus.initial => const Center(child: Text('Loading events...')),
-        },
+
+                  // Bottom section with tabs and content
+                  Expanded(
+                    child: Container(
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(30),
+                          topRight: Radius.circular(30),
+                        ),
+                      ),
+                      child: Column(
+                        children: [
+                          // TabBar in blue container
+                          Container(
+                            decoration: const BoxDecoration(
+                              // color: Color(0xFF2E70A9),
+                              borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(30),
+                                topRight: Radius.circular(30),
+                              ),
+                            ),
+                            child: const Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Tab bar
+                                TabBar(
+                                  labelColor: Colors.black,
+                                  unselectedLabelColor: Color(0xff3c3c4366),
+                                  indicatorColor: Color(0xFF2E70A9),
+                                  indicatorSize: TabBarIndicatorSize.tab,
+                                  tabs: [
+                                    Tab(text: 'DAY 1'),
+                                    Tab(text: 'DAY 2'),
+                                  ],
+                                ),
+
+                                // Speakers title
+                                Padding(
+                                  padding: EdgeInsets.only(left: 16, top: 20, bottom: 10),
+                                  child: Text(
+                                    'Speakers',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w500,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          // TabBarView with speakers list from API data
+                          Expanded(
+                            child: TabBarView(
+                              children: [
+                                // Day 1 Content
+                                _buildEventsList(eventScheduleState.eventSchedule ?? [], day: 1, isUser: ref.watch(supabaseProvider).auth.currentUser != null),
+
+                                // Day 2 Content
+                                _buildEventsList(eventScheduleState.eventSchedule ?? [], day: 2, isUser: ref.watch(supabaseProvider).auth.currentUser != null),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            AudiencehomeStatus.error => const Center(child: Text('Error loading events')),
+            AudiencehomeStatus.initial => const Center(child: Text('Loading events...')),
+          },
+        ),
       ),
     );
   }

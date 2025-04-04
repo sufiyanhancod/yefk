@@ -113,6 +113,30 @@ class AskquestionRepository implements IAskquestionRepository {
   }
 
   @override
+  Stream<List<Questiondetails>> subscribeToModeratorQuestions(int eventId, String questionStatus) {
+    final controller = StreamController<List<Questiondetails>>();
+
+    _questionSubscription = _supabaseClient
+        .channel('public:question_details_view')
+        .onPostgresChanges(
+          event: PostgresChangeEvent.all,
+          schema: 'public',
+          table: 'questions',
+          callback: (payload) async {
+            try {
+              final response = await _supabaseClient.from('question_details_view').select('*').eq('event_id', eventId).eq('question_status', questionStatus);
+              controller.add(response.map(Questiondetails.fromJson).toList());
+            } catch (e) {
+              debugPrint(e.toString());
+            }
+          },
+        )
+        .subscribe();
+
+    return controller.stream;
+  }
+
+  @override
   void disposeSubscription() {
     _questionSubscription?.unsubscribe();
   }

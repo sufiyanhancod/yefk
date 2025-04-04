@@ -31,48 +31,70 @@ class _SpeakerhomeScreenMobileState extends ConsumerState<SpeakerhomeScreenMobil
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.white,
-      appBar: AppBar(
-        title: Text(
-          ref.read(supabaseProvider).auth.currentUser!.userMetadata?['name'] as String,
-          style: const TextStyle(color: Colors.black),
-        ),
-        backgroundColor: Colors.white,
-        elevation: 0,
-        actions: [
-          IconButton(
-            onPressed: () {
-              ref.read(supabaseProvider).auth.signOut();
-              context.goNamed(AppRouter.login);
-            },
-            icon: const Icon(Icons.logout, color: Colors.black),
-          ),
-        ],
-      ),
-      body: switch (ref.watch(askquestionNotifierProvider).status) {
-        AskquestionStatus.loading => const Center(child: CircularProgressIndicator()),
-        AskquestionStatus.error => const Center(child: Text('Error')),
-        AskquestionStatus.success || AskquestionStatus.subscribed => ref.watch(askquestionNotifierProvider).question.isEmpty
-            ? const Center(child: Text('No Questions Available'))
-            : ListView.builder(
-                padding: const EdgeInsets.all(16),
-                itemCount: ref.watch(askquestionNotifierProvider).question.length,
-                itemBuilder: (context, index) {
-                  final question = ref.watch(askquestionNotifierProvider).question[index];
-                  return QuestionCard(
-                    questionId: question.questionId ?? 0,
-                    userId: question.speakerId ?? '',
-                    userName: question.userName ?? '',
-                    question: question.questionText ?? '',
-                    timestamp: question.createdAt ?? '',
-                    isCompleted: question.questionStatus != 'ANSWERED',
-                    isActive: question.questionStatus == 'ACCEPTED',
-                  );
-                },
+    return WillPopScope(
+      onWillPop: () async {
+        final shouldPop = await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Exit App'),
+            content: const Text('Are you sure you want to exit?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('No'),
               ),
-        _ => const SizedBox.shrink(),
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text('Yes'),
+              ),
+            ],
+          ),
+        );
+        return shouldPop ?? false;
       },
+      child: Scaffold(
+        backgroundColor: AppColors.white,
+        appBar: AppBar(
+          title: Text(
+            ref.read(supabaseProvider).auth.currentUser!.userMetadata?['name'] as String,
+            style: const TextStyle(color: Colors.black),
+          ),
+          backgroundColor: Colors.white,
+          elevation: 0,
+          actions: [
+            IconButton(
+              onPressed: () {
+                ref.read(supabaseProvider).auth.signOut();
+                context.goNamed(AppRouter.login);
+              },
+              icon: const Icon(Icons.logout, color: Colors.black),
+            ),
+          ],
+        ),
+        body: switch (ref.watch(askquestionNotifierProvider).status) {
+          AskquestionStatus.loading => const Center(child: CircularProgressIndicator()),
+          AskquestionStatus.error => const Center(child: Text('Error')),
+          AskquestionStatus.success || AskquestionStatus.subscribed => ref.watch(askquestionNotifierProvider).question.isEmpty
+              ? const Center(child: Text('No Questions Available'))
+              : ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: ref.watch(askquestionNotifierProvider).question.length,
+                  itemBuilder: (context, index) {
+                    final question = ref.watch(askquestionNotifierProvider).question[index];
+                    return QuestionCard(
+                      questionId: question.questionId ?? 0,
+                      userId: question.speakerId ?? '',
+                      userName: question.userName ?? '',
+                      question: question.questionText ?? '',
+                      timestamp: question.createdAt ?? '',
+                      isCompleted: question.questionStatus != 'ANSWERED',
+                      isActive: question.questionStatus == 'ACCEPTED',
+                    );
+                  },
+                ),
+          _ => const SizedBox.shrink(),
+        },
+      ),
     );
   }
 }

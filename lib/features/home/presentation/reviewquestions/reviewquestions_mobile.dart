@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hancod_theme/colors.dart';
+import 'dart:async'; // Add if not present
 
 class ReviewquestionsScreenMobile extends ConsumerStatefulWidget {
   const ReviewquestionsScreenMobile({
@@ -30,8 +31,14 @@ class _ReviewquestionsScreenMobileState extends ConsumerState<ReviewquestionsScr
   void initState() {
     super.initState();
     Future.microtask(() {
-      ref.read(askquestionNotifierProvider.notifier).getQuestionbyModerator(widget.eventId, 'PENDING');
+      ref.read(askquestionNotifierProvider.notifier).subscribeToModeratorQuestions(widget.eventId);
     });
+  }
+
+  @override
+  void dispose() {
+    ref.read(askquestionNotifierProvider.notifier).dispose();
+    super.dispose();
   }
 
   @override
@@ -48,118 +55,145 @@ class _ReviewquestionsScreenMobileState extends ConsumerState<ReviewquestionsScr
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
-            onPressed: () {
-              ref.read(supabaseProvider).auth.signOut();
-              context.goNamed(AppRouter.login);
+            onPressed: () async {
+              await ref.read(supabaseProvider).auth.signOut();
+              if (context.mounted) {
+                context.goNamed(AppRouter.login);
+              }
             },
             color: AppColors.black,
           ),
         ],
       ),
       body: switch (ref.watch(askquestionNotifierProvider).status) {
-        AskquestionStatus.loading => const Center(child: CircularProgressIndicator()),
-        AskquestionStatus.success => Column(
-            children: [
-              // Toggle switch section
-              Container(
-                padding: const EdgeInsets.all(16),
-                margin: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: AppColors.secondary,
-                  borderRadius: BorderRadius.circular(5),
-                  border: Border.all(color: AppColors.secondary),
-                ),
-                child: Row(
+        AskquestionStatus.loading || AskquestionStatus.initial => const Center(child: CircularProgressIndicator()),
+        AskquestionStatus.success || AskquestionStatus.subscribed => ref.watch(askquestionNotifierProvider).question.isEmpty
+            ? Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
-                      widget.speakerName,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                      ),
+                    const Text(
+                      'No pending questions at the moment.',
+                      style: TextStyle(fontSize: 16, color: Colors.grey),
                     ),
-                    const Spacer(),
-                    CupertinoSwitch(
-                      activeColor: AppColors.primaryColor,
-                      value: switchValue,
-                      onChanged: (value) async {
-                        if (value == false) {
-                          final shouldDisable = await showDialog<bool>(
-                            context: context,
-                            barrierDismissible: false,
-                            builder: (context) => DisableSpeakerDialog(eventId: widget.eventId),
-                          );
-
-                          if (shouldDisable == true) {
-                            setState(() {
-                              switchValue = false;
-                            });
-                          }
-                        } else {
-                          setState(() {
-                            switchValue = true;
+                    const SizedBox(height: 20),
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width * 0.8,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          context.pushNamed(AppRouter.askQuestion, extra: {
+                            'eventId': widget.eventId,
+                            'speakerName': widget.speakerName,
+                            'eventTime': widget.eventTime,
                           });
-                        }
-                      },
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primaryColor,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                        ),
+                        child: const Text(
+                          'Ask Question',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
                     ),
                   ],
                 ),
-              ),
-
-              // Questions list
-              Expanded(
-                child: ListView.builder(
-                  itemCount: ref.watch(askquestionNotifierProvider).question.length, // Replace with actual question count
-                  itemBuilder: (context, index) {
-                    final question = ref.watch(askquestionNotifierProvider).question[index];
-                    return QuestionCard(
-                      eventId: widget.eventId,
-                      questionId: question.questionId!,
-                      profileImage: Assets.icons.profile.svg(), // Add actual asset
-                      userName: question.userName ?? '',
-                      question: question.questionText ?? '',
-                      timestamp: question.createdAt ?? '',
-                      isFirstQuestion: index == 0,
-                    );
-                  },
-                ),
-              ),
-              // Bottom button
-              // Bottom button
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      context.pushNamed(AppRouter.askQuestion, extra: {
-                        'eventId': widget.eventId,
-                        'speakerName': widget.speakerName,
-                        'eventTime': widget.eventTime,
-                      });
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primaryColor,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
+              )
+            : Column(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    margin: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: AppColors.secondary,
+                      borderRadius: BorderRadius.circular(5),
+                      border: Border.all(color: AppColors.secondary),
                     ),
-                    child: const Text(
-                      'Ask Question',
-                      style: TextStyle(color: Colors.white),
+                    child: Row(
+                      children: [
+                        Text(
+                          widget.speakerName,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const Spacer(),
+                        CupertinoSwitch(
+                          activeColor: AppColors.primaryColor,
+                          value: switchValue,
+                          onChanged: (value) async {
+                            if (value == false) {
+                              final shouldDisable = await showDialog<bool>(
+                                context: context,
+                                barrierDismissible: false,
+                                builder: (context) => DisableSpeakerDialog(eventId: widget.eventId),
+                              );
+
+                              if (shouldDisable == true) {
+                                setState(() {
+                                  switchValue = false;
+                                });
+                              }
+                            } else {
+                              setState(() {
+                                switchValue = true;
+                              });
+                            }
+                          },
+                        ),
+                      ],
                     ),
                   ),
-                ),
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: ref.watch(askquestionNotifierProvider).question.length,
+                      itemBuilder: (context, index) {
+                        final question = ref.watch(askquestionNotifierProvider).question[index];
+                        return QuestionCard(
+                          eventId: widget.eventId,
+                          questionId: question.questionId!,
+                          profileImage: Assets.icons.profile.svg(),
+                          userName: question.userName ?? '',
+                          question: question.questionText ?? '',
+                          timestamp: question.createdAt?.toString() ?? '',
+                          isFirstQuestion: index == 0,
+                        );
+                      },
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          context.pushNamed(AppRouter.askQuestion, extra: {
+                            'eventId': widget.eventId,
+                            'speakerName': widget.speakerName,
+                            'eventTime': widget.eventTime,
+                          });
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primaryColor,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                        ),
+                        child: const Text(
+                          'Ask Question',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
-        AskquestionStatus.error => const Center(child: Text('Error')),
-        AskquestionStatus.initial => const Center(child: Text('Initial')),
-        AskquestionStatus.subscribed => const Center(child: Text('subscribed')),
+        AskquestionStatus.error => const Center(child: Text('Error loading questions')),
       },
     );
   }
 }
 
-// Separate widget for question card
 class QuestionCard extends ConsumerWidget {
   const QuestionCard({
     required this.profileImage,
@@ -189,12 +223,11 @@ class QuestionCard extends ConsumerWidget {
       ),
       child: Theme(
         data: Theme.of(context).copyWith(
-          dividerColor: Colors.transparent, // Removes the borders
+          dividerColor: Colors.transparent,
         ),
         child: ExpansionTile(
           tilePadding: const EdgeInsets.all(16),
           childrenPadding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
-          // Remove the default trailing icon color
           iconColor: Colors.grey,
           title: Row(
             children: [
@@ -208,14 +241,14 @@ class QuestionCard extends ConsumerWidget {
                       userName,
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
-                        color: Colors.black, // Ensure text color stays black
+                        color: Colors.black,
                       ),
                     ),
                     Text(
                       question,
                       style: const TextStyle(
                         fontSize: 14,
-                        color: Colors.black87, // Ensure text color stays dark
+                        color: Colors.black87,
                       ),
                     ),
                     Text(
@@ -267,7 +300,6 @@ class QuestionCard extends ConsumerWidget {
   }
 }
 
-// Add this custom dialog widget
 class DisableSpeakerDialog extends ConsumerWidget {
   const DisableSpeakerDialog({super.key, required this.eventId});
   final int eventId;
@@ -321,7 +353,6 @@ class DisableSpeakerDialog extends ConsumerWidget {
             const SizedBox(height: 16),
             const Text(
               "This action will deactivate speaker access permanently. You won't be able to undo this later.",
-              //textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 16,
                 color: Colors.grey,

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:app/features/home/home.dart';
+import 'package:app/shared/providers/supabase_provider/supabase_provider.dart';
 import 'package:app/shared/utils/utils.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:go_router/go_router.dart';
@@ -138,10 +139,43 @@ class AskquestionNotifier extends _$AskquestionNotifier {
     );
   }
 
-  @override
+  Future<void> subscribeToModeratorQuestions(int eventId) async {
+    state = state.copyWith(status: AskquestionStatus.loading);
+
+    // Fetch initial data immediately
+    try {
+      final initialQuestions = await _askquestionRepository.getQuestionbyModerator(eventId, 'PENDING');
+      state = state.copyWith(
+        // Use success status initially, then subscribed upon receiving stream updates
+        status: initialQuestions.isEmpty ? AskquestionStatus.success : AskquestionStatus.subscribed,
+        question: initialQuestions,
+      );
+    } catch (e) {
+      Alert.showSnackBar(e.toString());
+      // Set status to error if initial fetch fails, but still attempt subscription
+      state = state.copyWith(status: AskquestionStatus.error);
+    }
+
+    // Cancel any existing subscription before starting a new one
+    _subscription?.cancel();
+    // Set up subscription for future updates
+    _subscription = _askquestionRepository.subscribeToModeratorQuestions(eventId, 'PENDING').listen(
+      (questions) {
+        state = state.copyWith(
+          status: AskquestionStatus.subscribed, // Keep status as subscribed
+          question: questions,
+        );
+      },
+      onError: (error) {
+        Alert.showSnackBar(error.toString());
+        state = state.copyWith(status: AskquestionStatus.error);
+      },
+    );
+  }
+
   void dispose() {
     _subscription?.cancel();
     _askquestionRepository.disposeSubscription();
-//
+    // super.dispose(); // Call super.dispose() if AskquestionNotifier extends AutoDisposeNotifier or similar
   }
 }
